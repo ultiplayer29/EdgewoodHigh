@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+		<title>School Announcements</title>
+		<meta name="description" content="">
+		<meta name="author" content="paderic.driscoll">
+
+		<meta name="viewport" content="width=device-width; initial-scale=1.0">
+
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="pics/favicon.ico">
+		<link href="css/bootstrap.min.css" rel="stylesheet">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src="js/myFunctions.js"></script>
+		<style>
+			h3{
+				text-align:center;
+			}
+			.header{
+				background-image:url('pics/Header4.jpg');
+				height:105px;
+				overflow:hidden;
+				border-bottom:1px solid #883001;
+			}
+			.headerBar{
+				vertical-align:middle;
+			}
+			.announcements{
+				height:975px;
+				overflow:hidden;
+			}
+			.sideStrip{
+				position:relative;
+				height:975px;
+				background-color:#883001;
+				padding-top:15px;
+				color:#ffd700;
+				font-size:500%;
+				font-family:'Century Gothic';
+				font-weight:bold;
+				text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+				text-align:center;
+			}
+			.time{
+				font-size:50%;
+				position:absolute;
+				bottom:0;
+			}
+			#announcements > h4{
+				color:#883001;
+				text-align:center;
+				font-size:400%;
+				font-family:'Gill Sans',sans-serif;
+				text-transform: uppercase;
+			}
+			#announcements >p{
+				font-family: 'Gill Sans';
+				font-size:400%;
+			}
+			#scheduleDay{
+				font-size:500%;
+				font-family:'Century Gothic';
+				font-weight:bold;
+				color:#883001;
+			}
+		</style>
+		<script>
+		//$(document).ready(function() {
+			//console.log($("#announcements").height());
+			//$(".announcements").animate({ scrollTop: $(".announcements").height() + 10000 }, 240000, "linear");
+		//});
+		function onDOMLoad(){
+			
+			var xhttp;
+			if (window.XDomainRequest) xmlhttp = new XDomainRequest();
+			else if (window.XMLHttpRequest) xhttp = new XMLHttpRequest();
+			else xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+			
+			xhttp.onreadystatechange = function(){
+				if(this.readyState == 4 && this.status == 200){
+					var XML = xhttp.responseXML;
+					              
+                   
+					var itemElements = XML.getElementsByTagName("item");
+					
+					for(x=0;x<itemElements.length;x++){
+						var itemChildren = getChildElements(itemElements[x]);
+						for(y=0;y<itemChildren.length;y++){
+							var nv = itemChildren[y].childNodes[0].nodeValue;
+							
+							var events = getEvents(itemChildren[itemChildren.length-1].childNodes[0].nodeValue, itemChildren[0], itemChildren.length -1);
+							if(isDayName(nv)){
+								
+								setPageHeader(itemChildren[y]);}
+						//	else if(nv.indexOf("MASS IN THE CHAPEL")>-1){
+							//	paragraphify(events, "chapelMass");
+						//	}
+							//else if(nv.indexOf("FIRST FRIDAY")>-1){
+							//	paragraphify(events, "firstFridayMass");
+							//}
+							//else if(nv.indexOf("SPORTS RESULTS")>-1){
+							//	paragraphify(events, "sportsResults");
+							//}
+							//else if(nv.indexOf("ATHLETICS")>-1){
+							//	paragraphify(events, "upcomingSports");
+//							} 
+							else if(itemChildren[y].nodeName == "title" && nv.indexOf("MASS IN THE CHAPEL")<0 && nv.indexOf("FIRST FRIDAY")<0 && nv.indexOf("SPORTS RESULTS")<0 && nv.indexOf("ATHLETICS")<0){
+								paragraphifyAnnouncement(nv,events, "announcements");
+								
+							}
+						}
+					}
+					
+					
+				
+					
+					
+					
+				}
+			};
+			
+			xhttp.open("GET","bulletinData.xml",false);
+			xhttp.overrideMimeType('text/xml');
+			xhttp.send();
+			verticalScroll(".announcements","#announcements",240000);
+			setInterval(function(){setMod(document.getElementById('scheduleDay').innerHTML)}, 100);
+			setInterval(setTime,100);
+			
+		
+		}
+		function setMod(schedule){
+			
+			var html = "M<br>O<br>D<br><br> ";
+			var homeroomHTML = "H<br>O<br>M<br>E<br>R<br>O<br>O<br>M";
+			var fiveMinutes = 5*60*1000;
+			var mod = 0;
+			var today = new Date();
+			var now = today.getTime();
+		
+		
+			var right = document.getElementById("rightStrip");
+			var left = document.getElementById("leftStrip");
+			for(z=0;z<getModTimes(schedule).length + 1;z++){
+				if(now >=getModTimes(schedule)[9].getTime()-fiveMinutes){
+					mod = 9;
+					break;
+				}
+				else if(now >= getModTimes(schedule)[z].getTime()-fiveMinutes && now < getModTimes(schedule)[z+1].getTime()-fiveMinutes){
+					mod = z;
+					break;
+				}
+			}
+			if(schedule.indexOf("LITURGY")>-1){
+				if(mod == 0){
+					right.innerHTML = html +1;
+					left.innerHTML = html + 1;
+				}
+				else if(mod == 1){
+					right.innerHTML = html + 2;
+					left.innerHTML = html + 2;
+				}
+				else if(mod == 2){
+					right.innerHTML = homeroomHTML;
+					left.innerHTML = homeroomHTML;
+				}
+				else{
+					right.innerHTML = html + mod;
+					left.innerHTML = html + mod;
+				}
+			}
+			else{
+				if(mod == 0){
+					right.innerHTML = html +1;
+					left.innerHTML = html + 1;
+				}
+				else if(mod == 1){
+					right.innerHTML = homeroomHTML;
+					left.innerHTML = homeroomHTML;
+				}
+				else{
+					right.innerHTML = html + mod;
+					left.innerHTML = html + mod;
+				}
+			}
+		}
+		function setPageHeader(titleNode){
+			document.getElementById("scheduleDay").innerHTML = simpleTitle(titleNode.childNodes[0].nodeValue);
+		}
+		function isDayName(titleNodeText){
+			var dayNames = ["DAY 1 -", "DAY 1-", "DAY 2-", "DAY 2 -", "DAY 3 -", "DAY 3-","DAY 4 -","DAY 4-","DAY 5 -","DAY 5-","DAY 6 -","DAY 6-","NO SCHOOL", "DAY 1 ON A", "DAY 2 ON A","DAY 3 ON A","DAY 4 ON A","DAY 5 ON A","DAY 6 ON A"];
+			var tf = false;
+			for(day=0;day<dayNames.length;day++){
+				if(titleNodeText.indexOf(dayNames[day])>-1){
+					tf = true;
+					break;
+				}
+			}
+			return tf;
+			
+		}
+		
+		function getChildElements(parentNode){
+			var counter = 0;
+			var childElements = [];
+			var allChildren = parentNode.childNodes;
+			for(n=0;n<allChildren.length;n++){
+				if(allChildren[n].nodeType == 1){
+					childElements[counter] = allChildren[n];
+					counter++;
+				}
+			}
+			return childElements;
+			
+		}
+		function getEvents(lastChild, titleNode, numSiblings){
+			var events = [titleNode.nextSibling];
+			while(events[0].nodeType !=1){
+				if(events[0].nextSibling != null)
+					events[0] = events[0].nextSibling;
+				else
+					break;
+			}
+			for(sib=1;sib<numSiblings;sib++){
+				events[sib] = events[sib-1].nextSibling;
+				while(events[sib].nodeType !=1){
+					events[sib] = events[sib].nextSibling;
+				}
+				if(events[sib].childNodes[0].nodeValue == lastChild){
+					break;
+				}
+			}
+			return events;
+		}
+		function listify(eventsToList, id){
+			var html = "<ul>";
+			for(t=0;t<eventsToList.length;t++){
+				html =html+"<li>"+eventsToList[t].childNodes[0].nodeValue+"</li>";
+			}
+			html = html+"</ul>";
+			
+			document.getElementById(id).innerHTML += html;
+		}
+		function paragraphify(eventsToList, id){
+			var innerHTML = '<p>';
+			for(mass=0;mass<eventsToList.length;mass++){
+				innerHTML +=eventsToList[mass].childNodes[0].nodeValue +"<br><br>";
+			}
+			innerHTML +='</p>';
+			document.getElementById(id).innerHTML += innerHTML;
+		}
+		function paragraphifyAnnouncement(title, eventsToList, id){
+			var innerHTML = '<h4><strong><u>'+title+'</u></strong></h4><p>';
+			for(mass=0;mass<eventsToList.length;mass++){
+				if(eventsToList[mass].childNodes[0] != undefined){
+					
+					innerHTML +=eventsToList[mass].childNodes[0].nodeValue + "<br><br>";}
+			}
+			innerHTML +='</p>';
+			document.getElementById(id).innerHTML += innerHTML;
+		}
+		function setTime(){
+			document.getElementById('leftTime').innerHTML = getCurrentTime();
+			document.getElementById('rightTime').innerHTML = getCurrentTime();
+		}
+		</script>
+		
+	</head>
+
+	<body onload="onDOMLoad()">
+		<div class="header">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-md-12 headerBar"><h1 id="scheduleDay"></h1></div>
+						
+					
+				</div>
+			
+			</div>
+		</div>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-md-1 sideStrip"><p id="leftStrip"></p><p class="time" id='leftTime'></p></div>
+				<div class="col-md-10 announcements"><div id="announcements"></div></div>
+				<div class="col-md-1 sideStrip"><p id='rightStrip'></p><p class="time" id='rightTime'></p></div>
+			</div>
+		</div>
+		
+		
+	</body>
+</html>
