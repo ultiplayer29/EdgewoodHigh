@@ -22,8 +22,8 @@ public class Bulletin {
 
 	public static void begin() {
 		try {
-			in = new BufferedReader(new FileReader(new File("C:\\Program Files\\PowerSchool\\data\\external\\autosend\\BulletinItems_export.txt")));
-			out = new StreamResult(new File("\\\\172.20.0.93\\Bulletin Share\\public_html\\bulletinData.xml"));
+			in = new BufferedReader(new FileReader(new File("")));//location of txt file output by Powerschool
+			out = new StreamResult(new File(""));//location of XML file that will be updated by this program
 			openXml();
 			String str;
 			while ((str = in.readLine()) != null) {
